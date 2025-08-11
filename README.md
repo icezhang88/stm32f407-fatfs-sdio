@@ -1,33 +1,27 @@
 
 :::highlight purple 💡
-FATFS 配置输入引脚 一定要上拉 不然无法初始化
+FATFS 配置输入引脚 一定要上拉 不然无法初始化 会提示 FR_RESULT_NOT_READY的问题
 :::
-![image.png](https://api.apifox.com/api/v1/projects/5549792/resources/554176/image-preview)
+ 
+<img width="1062" height="918" alt="image" src="https://github.com/user-attachments/assets/251851a5-41eb-468f-8092-9ff1c01d288a" />
+
+<img width="1017" height="902" alt="image" src="https://github.com/user-attachments/assets/9e0103f8-95d8-4d41-8bcf-1b65e927b16e" />
+
+<img width="1048" height="931" alt="image" src="https://github.com/user-attachments/assets/e286b966-ed9a-47ea-8fe2-f4af470b0a32" />
 
 
-![image.png](https://api.apifox.com/api/v1/projects/5549792/resources/554177/image-preview)
+<img width="1118" height="958" alt="image" src="https://github.com/user-attachments/assets/55100a53-c605-46e1-8939-b9a5add5b5ba" />
 
+<img width="1118" height="929" alt="image" src="https://github.com/user-attachments/assets/a7c033b9-77e8-4fed-9ebd-ddd930614c07" />
 
-![image.png](https://api.apifox.com/api/v1/projects/5549792/resources/554178/image-preview)
+<img width="1037" height="929" alt="image" src="https://github.com/user-attachments/assets/cb8f2ae7-a3dd-4016-8031-e59ecbd7463f" />
 
-
-![image.png](https://api.apifox.com/api/v1/projects/5549792/resources/554179/image-preview)
-
-
-![image.png](https://api.apifox.com/api/v1/projects/5549792/resources/554180/image-preview)
-
-
-![image.png](https://api.apifox.com/api/v1/projects/5549792/resources/554181/image-preview)
-
-
-
-![image.png](https://api.apifox.com/api/v1/projects/5549792/resources/554182/image-preview)
+<img width="1066" height="778" alt="image" src="https://github.com/user-attachments/assets/f9bf016f-cd55-4690-b1d9-4f87b2774851" />
 
 
 
-
-```js
-/* USER CODE BEGIN Header */
+```C
+ /* USER CODE BEGIN Header */
 /**
   ******************************************************************************
   * @file           : main.c
@@ -141,6 +135,97 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+void ListFiles(const TCHAR* path)
+{
+    FRESULT res;
+    DIR dir;               // 目录对象
+    FILINFO fno;           // 文件信息结构体
+
+    // 打开目录
+    res = f_opendir(&dir, path);
+    if (res != FR_OK) {
+        printf("打开目录失败！错误码: %d\r\n", res);
+        return;
+    }
+
+    printf("\r\n目录 %s 下的文件列表：\r\n", path);
+    printf("----------------------------------------\r\n");
+
+    // 循环读取目录项（f_readdir返回FR_OK且fno.fname不为空时继续）
+    while (f_readdir(&dir, &fno) == FR_OK && fno.fname[0] != 0) {
+        // 判断是否为子目录（文件名以'/'结尾，或fno.fattrib包含AM_DIR属性）
+        if (fno.fattrib & AM_DIR) {
+            printf(" [目录]  %s\r\n", fno.fname);  // 子目录
+        } else {
+            // 普通文件：输出文件名和大小（单位：字节）
+            printf(" [文件]  %s  (大小: %ld 字节)\r\n", fno.fname, fno.fsize);
+        }
+    }
+
+    printf("----------------------------------------\r\n");
+    printf("目录遍历完成\r\n");
+
+    // 关闭目录
+    f_closedir(&dir);
+}
+void PrintHexData(uint8_t* buffer, uint16_t len)
+{
+    for (uint16_t i = 0; i < len; i++) {
+        // 格式化输出单个字节（%02X表示两位16进制，不足补0）
+        printf("%02X ", buffer[i]);
+
+        // 每16个字节换行，方便查看
+        if ((i + 1) % 16 == 0) {
+            printf("\r\n");
+        }
+    }
+    printf("\r\n"); // 最后补一个换行
+}
+void ReadPCMFile(const char* filename)
+{
+    FRESULT res;
+    FIL file;
+    UINT bytesRead;
+    uint8_t buffer[512];  // 读取缓冲区，大小可根据需要调整
+    uint32_t totalRead = 0;
+
+    // 打开文件（只读模式）
+    res = f_open(&file, filename, FA_READ);
+    if (res != FR_OK) {
+        printf("打开文件 %s 失败！错误码: %d\r\n", filename, res);
+        return;
+    }
+
+    printf("成功打开文件 %s，开始读取...\r\n", filename);
+    printf("文件大小: %ld 字节\r\n", f_size(&file));
+
+    // 循环读取文件内容
+    do {
+        // 读取数据到缓冲区
+        res = f_read(&file, buffer, sizeof(buffer), &bytesRead);
+        if (res != FR_OK) {
+            printf("读取文件失败！错误码: %d\r\n", res);
+            break;
+        }
+        //PrintHexData(buffer, bytesRead);
+        // 累计读取字节数
+        totalRead += bytesRead;
+
+        // 这里可以添加处理PCM数据的代码
+        // 例如：通过DMA发送到DAC播放，或通过串口转发等
+        // 示例：打印读取进度
+        if (totalRead % (1024 * 10) == 0) {  // 每读取10KB打印一次进度
+            printf("已读取: %ld KB\r\n", totalRead / 1024);
+        }
+
+    } while (bytesRead == sizeof(buffer));  // 直到读取的字节数小于缓冲区大小
+
+    // 关闭文件
+    f_close(&file);
+
+    printf("文件读取完成，总读取字节数: %ld 字节\r\n", totalRead);
+}
+
 
 /* USER CODE END 0 */
 
@@ -175,39 +260,44 @@ int main(void)
   MX_GPIO_Init();
   MX_DMA_Init();
   MX_SDIO_SD_Init();
-  MX_FATFS_Init();
   MX_USART1_UART_Init();
+  MX_FATFS_Init();
   /* USER CODE BEGIN 2 */
   FRESULT retSD = f_mount(&SDFatFS, (TCHAR const *)SDPath, 1);
-  printf("%u\r\n",retSD);
-  printf("Compilation Date: %s %s\n", __DATE__, __TIME__);
-   // mount SD card
-//   int retSD = f_mount(&SDFatFS, (TCHAR const *)SDPath, 1);
-   if (retSD == FR_OK) {
-       printf("》Filesystem mount ok, now you can read/write files.\r\n");
-       // 创建或者打开文件 SD_Card_test.txt
-       retSD = f_open(&SDFile, "SD_Card_test.txt", FA_OPEN_ALWAYS | FA_WRITE);
-       if (retSD == FR_OK) {
-           printf("》open/create SD_Card_test.txt OK, write data to it.\r\n");
+    printf("%u\r\n",retSD);
+    printf("Compilation Date: %s %s\n", __DATE__, __TIME__);
+     // mount SD card
+  //   int retSD = f_mount(&SDFatFS, (TCHAR const *)SDPath, 1);
+     if (retSD == FR_OK) {
 
-           // Move to end of the file to append data
-           retSD = f_lseek(&SDFile, f_size(&SDFile));
-           if (retSD == FR_OK) {
-               f_printf(&SDFile, "SD card FATFS test.\r\n");
-               printf("》write data to file OK, write bytes: SD card FATFS test.\r\n");
-           } else {
-               printf("!! File Write error: (%d)\n", retSD);
-           }
-           /* close file */
-           f_close(&SDFile);
-       } else {
-           printf("!! open/Create file SD_Card_test.txt Fail (%d).\r\n", retSD);
-       }
-   } else {
-       printf("!! SDcard mount filesystem error。(%d)\r\n", retSD);
-   }
-   // 不带fatfs调试函数
-   SDCard_ShowInfo();
+    	 ListFiles("/");
+
+    	 ReadPCMFile("o.pcm");
+
+         printf("》Filesystem mount ok, now you can read/write files.\r\n");
+         // 创建或者打开文件 SD_Card_test.txt
+         retSD = f_open(&SDFile, "SD_Card_test.txt", FA_OPEN_ALWAYS | FA_WRITE);
+         if (retSD == FR_OK) {
+             printf("》open/create SD_Card_test.txt OK, write data to it.\r\n");
+
+             // Move to end of the file to append data
+             retSD = f_lseek(&SDFile, f_size(&SDFile));
+             if (retSD == FR_OK) {
+                 f_printf(&SDFile, "SD card FATFS test.\r\n");
+                 printf("》write data to file OK, write bytes: SD card FATFS test.\r\n");
+             } else {
+                 printf("!! File Write error: (%d)\n", retSD);
+             }
+             /* close file */
+             f_close(&SDFile);
+         } else {
+             printf("!! open/Create file SD_Card_test.txt Fail (%d).\r\n", retSD);
+         }
+     } else {
+         printf("!! SDcard mount filesystem error。(%d)\r\n", retSD);
+     }
+     // 不带fatfs调试函数
+     SDCard_ShowInfo();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -302,5 +392,6 @@ void assert_failed(uint8_t *file, uint32_t line)
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
+
 
 ```
