@@ -1,0 +1,5 @@
+../Core/Src/filemanager.c:10:9:initFileManager	16	static
+../Core/Src/filemanager.c:33:6:PrintHexData	24	static
+../Core/Src/filemanager.c:46:6:ListFiles	352	static
+../Core/Src/filemanager.c:80:6:SDCard_ShowInfo	48	static
+../Core/Src/filemanager.c:100:6:SDCard_ShowStatus	32	static
