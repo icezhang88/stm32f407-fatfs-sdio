@@ -210,13 +210,14 @@ void WavPlay(AudioPlayer *player) {
 
     // 开始播放第一个缓冲区
     player->current_buffer = 0;
+    printf("send first block\r\n");
     HAL_I2S_Transmit_DMA(&hi2s2, (uint16_t*)player->buffer, BUFFER_SIZE / 2);
 }
 
 // I2S传输完成回调函数
 void HAL_I2S_TxCpltCallback(I2S_HandleTypeDef *hi2s) {
 
-
+	printf("HAL_I2S_TxCpltCallback\r\n");
 
     if (!player.playing) return;
 
@@ -229,6 +230,7 @@ void HAL_I2S_TxCpltCallback(I2S_HandleTypeDef *hi2s) {
         }
         player.current_buffer = 1;
         HAL_I2S_Transmit_DMA(&hi2s2, (uint16_t*)player.buffer2, BUFFER_SIZE / 2);
+        printf("send buffer 0\r\n");
     } else {
         // 填充第二个缓冲区，同时播放第一个
         if (!FillBuffer(&player, player.buffer2, BUFFER_SIZE)) {
@@ -237,6 +239,7 @@ void HAL_I2S_TxCpltCallback(I2S_HandleTypeDef *hi2s) {
         }
         player.current_buffer = 0;
         HAL_I2S_Transmit_DMA(&hi2s2, (uint16_t*)player.buffer, BUFFER_SIZE / 2);
+        printf("send buffer 1\r\n");
     }
 
     // 检查是否播放完成
