@@ -1,5 +1,6 @@
-../Core/Src/filemanager.c:10:9:initFileManager	2
-../Core/Src/filemanager.c:33:6:PrintHexData	3
-../Core/Src/filemanager.c:46:6:ListFiles	5
-../Core/Src/filemanager.c:80:6:SDCard_ShowInfo	2
-../Core/Src/filemanager.c:100:6:SDCard_ShowStatus	2
+../Core/Src/filemanager.c:11:6:testRead	4
+../Core/Src/filemanager.c:51:9:initFileManager	2
+../Core/Src/filemanager.c:73:6:PrintHexData	3
+../Core/Src/filemanager.c:86:6:ListFiles	5
+../Core/Src/filemanager.c:119:6:SDCard_ShowInfo	2
+../Core/Src/filemanager.c:139:6:SDCard_ShowStatus	2

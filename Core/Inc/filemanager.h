@@ -23,5 +23,7 @@ void SDCard_ShowInfo(void);
 
 void SDCard_ShowStatus(void);
 
+void testRead();
+
 
 #endif

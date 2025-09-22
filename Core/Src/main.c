@@ -36,40 +36,42 @@
 /* USER CODE BEGIN PTD */
 // WAV文件头部结构
 typedef struct {
-    uint8_t  riff[4];         // "RIFF"
-    uint32_t file_size;       // 文件大小 - 8
-    uint8_t  wave[4];         // "WAVE"
-    uint8_t  fmt[4];          // "fmt "
-    uint32_t fmt_size;        // 格式块大小
-    uint16_t audio_format;    // 音频格式 (1 = PCM)
-    uint16_t num_channels;    // 声道数
-    uint32_t sample_rate;     // 采样率
-    uint32_t byte_rate;       // 字节率
-    uint16_t block_align;     // 块对齐
-    uint16_t bits_per_sample; // 每样本位数
+	uint8_t riff[4];         // "RIFF"
+	uint32_t file_size;       // 文件大小 - 8
+	uint8_t wave[4];         // "WAVE"
+	uint8_t fmt[4];          // "fmt "
+	uint32_t fmt_size;        // 格式块大小
+	uint16_t audio_format;    // 音频格式 (1 = PCM)
+	uint16_t num_channels;    // 声道数
+	uint32_t sample_rate;     // 采样率
+	uint32_t byte_rate;       // 字节率
+	uint16_t block_align;     // 块对齐
+	uint16_t bits_per_sample; // 每样本位数
 } WavHeader;
 
 // 音频播放控制结构体
 typedef struct {
-    FIL file;                 // 文件对象
-    uint32_t data_start;      // 数据起始位置
-    uint32_t data_size;       // 数据大小
-    uint32_t bytes_played;    // 已播放字节数
-    uint8_t  buffer[2048];    // 双缓冲区
-    uint8_t  buffer2[2048];   // 双缓冲区
-    uint8_t  current_buffer;  // 当前使用的缓冲区
-    uint8_t  playing;         // 播放状态
+	FIL file;                 // 文件对象
+	uint32_t data_start;      // 数据起始位置
+	uint32_t data_size;       // 数据大小
+	uint32_t bytes_played;    // 已播放字节数
+	uint8_t buffer[2048];    // 双缓冲区
+	uint8_t buffer2[2048];   // 双缓冲区
+	uint8_t current_buffer;  // 当前使用的缓冲区
+	uint8_t playing;         // 播放状态
 } AudioPlayer;
 
 int __io_putchar(int ch) {
-    HAL_UART_Transmit(&huart1, (uint8_t*) &ch, 1, 0xFFFFFFFF);
-    return ch;
+	HAL_UART_Transmit(&huart1, (uint8_t*) &ch, 1, 0xFFFFFFFF);
+	return ch;
 }
 
 int __io_getchar(void) {
-    char rxChar;
-    while (HAL_UART_Receive(&huart1, (uint8_t*) &rxChar, 1, 0xFFFFFFFF) == HAL_TIMEOUT);
-    return rxChar;
+	char rxChar;
+	while (HAL_UART_Receive(&huart1, (uint8_t*) &rxChar, 1, 0xFFFFFFFF)
+			== HAL_TIMEOUT)
+		;
+	return rxChar;
 }
 
 /* USER CODE END PTD */
@@ -87,7 +89,7 @@ int __io_getchar(void) {
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-AudioPlayer player = {0};
+AudioPlayer player = { 0 };
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -103,151 +105,164 @@ void WavPlay(AudioPlayer *player);
 
 // 解析WAV文件头部并打开文件
 uint8_t WavOpen(const char *filename, WavHeader *header, AudioPlayer *player) {
-    FRESULT res;
-    UINT bytesRead;
+	FRESULT res;
+	UINT bytesRead;
 
-    // 打开文件
-    res = f_open(&player->file, filename, FA_READ);
-    if (res != FR_OK) {
-        printf("open file failed %s error code: %d\r\n", filename, res);
-        return 0;
-    }
+	// 打开文件
+	res = f_open(&player->file, filename, FA_READ);
+	if (res != FR_OK) {
+		printf("open file failed %s error code: %d\r\n", filename, res);
+		return 0;
+	}
 
-    // 读取WAV头部
-    res = f_read(&player->file, header, sizeof(WavHeader), &bytesRead);
-    if (res != FR_OK || bytesRead != sizeof(WavHeader)) {
-        printf("read WAVhead failed error code : %d\r\n", res);
-        f_close(&player->file);
-        return 0;
-    }
+	// 读取WAV头部
+	res = f_read(&player->file, header, sizeof(WavHeader), &bytesRead);
+	if (res != FR_OK || bytesRead != sizeof(WavHeader)) {
+		printf("read WAVhead failed error code : %d\r\n", res);
+		f_close(&player->file);
+		return 0;
+	}
 
-    // 验证WAV文件
-    if (memcmp(header->riff, "RIFF", 4) != 0 || memcmp(header->wave, "WAVE", 4) != 0 ||
-        memcmp(header->fmt, "fmt ", 4) != 0 || header->audio_format != 1) {
-        printf("not ok PCM WAV file\r\n");
-        f_close(&player->file);
-        return 0;
-    }
+	// 验证WAV文件
+	if (memcmp(header->riff, "RIFF", 4) != 0
+			|| memcmp(header->wave, "WAVE", 4) != 0
+			|| memcmp(header->fmt, "fmt ", 4) != 0
+			|| header->audio_format != 1) {
+		printf("not ok PCM WAV file\r\n");
+		f_close(&player->file);
+		return 0;
+	}
 
-    // 打印音频信息
-    printf("WAV file info :\r\n");
-    printf("  sample rate : %d Hz\r\n", header->sample_rate);
-    printf("  channel count: %d\r\n", header->num_channels);
-    printf("  bit sample : %d bits\r\n", header->bits_per_sample);
+	// 打印音频信息
+	printf("WAV file info :\r\n");
+	printf("sample rate : %d Hz\r\n", header->sample_rate);
+	printf("channel count: %d\r\n", header->num_channels);
+	printf("bit sample : %d bits\r\n", header->bits_per_sample);
 
-    // 查找数据块
-    uint8_t chunk_id[4];
-    uint32_t chunk_size;
-    while (1) {
-        res = f_read(&player->file, chunk_id, 4, &bytesRead);
-        if (res != FR_OK || bytesRead != 4) break;
+	// 查找数据块
+	uint8_t chunk_id[4];
+	uint32_t chunk_size;
+	while (1) {
+		res = f_read(&player->file, chunk_id, 4, &bytesRead);
+		if (res != FR_OK || bytesRead != 4)
+			break;
 
-        res = f_read(&player->file, &chunk_size, 4, &bytesRead);
-        if (res != FR_OK || bytesRead != 4) break;
+		res = f_read(&player->file, &chunk_size, 4, &bytesRead);
+		if (res != FR_OK || bytesRead != 4)
+			break;
 
-        // 找到数据块
-        if (memcmp(chunk_id, "data", 4) == 0) {
-            player->data_start = f_tell(&player->file);
-            player->data_size = chunk_size;
-            player->bytes_played = 0;
-            player->playing = 1;
-            printf("find data block : %ld bytes\r\n", chunk_size);
-            return 1;
-        }
+		// 找到数据块
+		if (memcmp(chunk_id, "data", 4) == 0) {
+			player->data_start = f_tell(&player->file);
+			player->data_size = chunk_size;
+			player->bytes_played = 0;
+			player->playing = 1;
+			printf("find data block : %ld bytes\r\n", chunk_size);
+			return 1;
+		}
 
-        // 跳过当前块
-        f_lseek(&player->file, f_tell(&player->file) + chunk_size);
-    }
+		// 跳过当前块
+		f_lseek(&player->file, f_tell(&player->file) + chunk_size);
+	}
 
-    printf("未找到数据块！\r\n");
-    f_close(&player->file);
-    return 0;
+	printf("未找到数据块！\r\n");
+	f_close(&player->file);
+	return 0;
 }
 
 // 填充缓冲区
 uint8_t FillBuffer(AudioPlayer *player, uint8_t *buffer, uint32_t size) {
-    UINT bytesRead;
-    uint32_t bytesToRead = size;
+	UINT bytesRead;
+	uint32_t bytesToRead = size;
 
-    // 检查是否还有数据可读取
-    if (player->bytes_played >= player->data_size) {
-        return 0;
-    }
 
-    // 计算实际可读取的字节数
-    if (player->bytes_played + bytesToRead > player->data_size) {
-        bytesToRead = player->data_size - player->bytes_played;
-    }
+	// 检查是否还有数据可读取
+	if (player->bytes_played >= player->data_size) {
+		return 0;
+	}
 
-    // 读取数据
-    FRESULT res = f_read(&player->file, buffer, bytesToRead, &bytesRead);
-    if (res != FR_OK) {
-        printf("读取音频数据失败！错误码: %d\r\n", res);
-        return 0;
-    }
+	// 计算实际可读取的字节数
+	if (player->bytes_played + bytesToRead > player->data_size) {
+		bytesToRead = player->data_size - player->bytes_played;
+	}
 
-    // 填充剩余空间（如果需要）
-    if (bytesRead < bytesToRead) {
-        memset(buffer + bytesRead, 0, bytesToRead - bytesRead);
-    }
+	// 读取数据
+	FRESULT res = f_read(&player->file, buffer, bytesToRead, &bytesRead);
+	if (res != FR_OK) {
+		printf("data send error: %d\r\n", res);
+		return 0;
+	}else{
+		printf("data send success\r\n");
+	}
 
-    player->bytes_played += bytesRead;
-    return 1;
+	// 填充剩余空间（如果需要）
+	if (bytesRead < bytesToRead) {
+		memset(buffer + bytesRead, 0, bytesToRead - bytesRead);
+	}
+
+	player->bytes_played += bytesRead;
+	return 1;
 }
 
 // 开始播放WAV文件
 void WavPlay(AudioPlayer *player) {
-    // 填充两个缓冲区
-    if (!FillBuffer(player, player->buffer, BUFFER_SIZE)) {
-        player->playing = 0;
-        return;
-    }
+	// 填充两个缓冲区
+	if (!FillBuffer(player, player->buffer, BUFFER_SIZE)) {
+		player->playing = 0;
+		return;
+	}
 
-    if (!FillBuffer(player, player->buffer2, BUFFER_SIZE)) {
-        player->playing = 0;
-        return;
-    }
+	if (!FillBuffer(player, player->buffer2, BUFFER_SIZE)) {
+		player->playing = 0;
+		return;
+	}
 
-    // 开始播放第一个缓冲区
-    player->current_buffer = 0;
-    printf("send first block\r\n");
-    HAL_I2S_Transmit_DMA(&hi2s2, (uint16_t*)player->buffer, BUFFER_SIZE / 2);
+	// 开始播放第一个缓冲区
+	player->current_buffer = 0;
+	printf("send first block\r\n");
+	//HAL_I2S_Transmit_DMA(&hi2s2, (uint16_t*) player->buffer, BUFFER_SIZE / 2);
 }
 
 // I2S传输完成回调函数
 void HAL_I2S_TxCpltCallback(I2S_HandleTypeDef *hi2s) {
 
 	printf("HAL_I2S_TxCpltCallback\r\n");
+//	uint8_t data[32]={0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31};
+//	HAL_I2S_Transmit_DMA(&hi2s2, (uint16_t*) data,
+//					16);
 
-    if (!player.playing) return;
+//	if (!player.playing)
+//		return;
+//
+//	// 切换缓冲区
+//	if (player.current_buffer == 0) {
+//		// 填充第一个缓冲区，同时播放第二个
+//		if (!FillBuffer(&player, player.buffer, BUFFER_SIZE)) {
+//			player.playing = 0;
+//			return;
+//		}
+//		player.current_buffer = 1;
+//		//HAL_I2S_Transmit_DMA(&hi2s2, (uint16_t*) player.buffer2,	BUFFER_SIZE / 2);
+//		printf("send buffer 0\r\n");
+//	} else {
+//		// 填充第二个缓冲区，同时播放第一个
+//		if (!FillBuffer(&player, player.buffer2, BUFFER_SIZE)) {
+//			player.playing = 0;
+//			return;
+//		}
+//		player.current_buffer = 0;
+//		//HAL_I2S_Transmit_DMA(&hi2s2, (uint16_t*) player.buffer,BUFFER_SIZE / 2);
+//		printf("send buffer 1\r\n");
+//	}
+//	printf("send end\r\n");
+//	// 检查是否播放完成
+//	if (player.bytes_played >= player.data_size) {
+//		printf("play complete\r\n");
+//		player.playing = 0;
+//		f_close(&player.file);
+//	}
 
-    // 切换缓冲区
-    if (player.current_buffer == 0) {
-        // 填充第一个缓冲区，同时播放第二个
-        if (!FillBuffer(&player, player.buffer, BUFFER_SIZE)) {
-            player.playing = 0;
-            return;
-        }
-        player.current_buffer = 1;
-        HAL_I2S_Transmit_DMA(&hi2s2, (uint16_t*)player.buffer2, BUFFER_SIZE / 2);
-        printf("send buffer 0\r\n");
-    } else {
-        // 填充第二个缓冲区，同时播放第一个
-        if (!FillBuffer(&player, player.buffer2, BUFFER_SIZE)) {
-            player.playing = 0;
-            return;
-        }
-        player.current_buffer = 0;
-        HAL_I2S_Transmit_DMA(&hi2s2, (uint16_t*)player.buffer, BUFFER_SIZE / 2);
-        printf("send buffer 1\r\n");
-    }
 
-    // 检查是否播放完成
-    if (player.bytes_played >= player.data_size) {
-        printf("play complete\r\n");
-        player.playing = 0;
-        f_close(&player.file);
-    }
 }
 
 /* USER CODE END 0 */
@@ -260,7 +275,7 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-  WavHeader wavHeader;
+	WavHeader wavHeader;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -287,27 +302,27 @@ int main(void)
   MX_FATFS_Init();
   MX_I2S2_Init();
   /* USER CODE BEGIN 2 */
-  printf("system init success，read play WAV file...\r\n");
-  initFileManager();
-
-  // 打开WAV文件并开始播放
-  if (WavOpen("1.wav", &wavHeader, &player)) {
-      printf("start play WAV file ...\r\n");
-      WavPlay(&player);
-  } else {
-      printf("cant play WAV file \r\n");
-  }
+	printf("system init success，read play WAV file...\r\n");
+	initFileManager();
+	testRead();
+	// 打开WAV文件并开始播放
+//	if (WavOpen("2.wav", &wavHeader, &player)) {
+//		printf("start play WAV file ...\r\n");
+//		WavPlay(&player);
+//	} else {
+//		printf("cant play WAV file \r\n");
+//	}
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  while (1) {
+	while (1) {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    // 可以在这里添加其他处理逻辑
-    HAL_Delay(100);
-  }
+		// 可以在这里添加其他处理逻辑
+		HAL_Delay(1000);
+	}
   /* USER CODE END 3 */
 }
 
@@ -368,10 +383,10 @@ void SystemClock_Config(void)
 void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
-  /* User can add his own implementation to report the HAL error return state */
-  __disable_irq();
-  while (1) {
-  }
+	/* User can add his own implementation to report the HAL error return state */
+	__disable_irq();
+	while (1) {
+	}
   /* USER CODE END Error_Handler_Debug */
 }
 
