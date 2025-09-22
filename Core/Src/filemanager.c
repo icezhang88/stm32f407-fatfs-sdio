@@ -8,45 +8,13 @@
 #include "filemanager.h"
 
 #define BUFFER_SIZE 2048
-void testRead() {
 
-	FRESULT res;
-	FIL file;
-	UINT bytesRead;
-	uint8_t buffer[BUFFER_SIZE];  // 读取缓冲区，大小可根据需要调整
-	uint32_t totalRead = 0;
-	const char *filename = "2.wav";
-	// 打开文件（只读模式）
-	res = f_open(&file, filename, FA_READ);
-	if (res != FR_OK) {
-		printf("open %s failed error code: %d\r\n", filename, res);
-		return;
-	}
-	while (1) {
-		res = f_read(&file, buffer, BUFFER_SIZE, &bytesRead);
-		printf("read byte count:%d \r\n", bytesRead);
+void HAL_I2S_TxCpltCallback(I2S_HandleTypeDef *hi2s) {
 
-		if (bytesRead == 0) {
-			printf("file read complete\r\n");
-			break;
-		}
-		printf("------------- has read %d bytes: -----------", bytesRead);
-		HAL_I2S_Transmit_DMA(&hi2s2, buffer, BUFFER_SIZE / 2);
-		HAL_Delay(100);
-		printf("statue:  %d \r\n",HAL_I2S_GetState(&hi2s2));
-//		 while (HAL_I2S_GetState(&hi2s2) == HAL_I2S_STATE_BUSY_TX) {
-//		            // 可以添加超时处理
-//		        }
-		for (UINT i = 0; i < bytesRead; i++) {
-
-			//printf("%02X", buffer[i]-30);
-		}
-		printf("\r\n");
-	}
-
-	fclose(&file);
-
+	//printf("HAL_I2S_TxCpltCallback\r\n");
 }
+
+
 
 uint8_t initFileManager() {
 
