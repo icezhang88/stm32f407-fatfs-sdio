@@ -1,6 +1,6 @@
 ../Core/Src/main.c:64:5:__io_putchar	1
 ../Core/Src/main.c:69:5:__io_getchar	2
-../Core/Src/main.c:105:6:testRead	15
+../Core/Src/main.c:105:6:testRead	13
 ../Core/Src/main.c:192:9:WavOpen	13
 ../Core/Src/main.c:259:9:FillBuffer	5
 ../Core/Src/main.c:293:6:WavPlay	3

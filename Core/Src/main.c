@@ -164,16 +164,16 @@ void testRead() {
 
 	        // 读取数据（用实际需要的字节数，而非固定BUFFER_SIZE）
 	        res = f_read(&file, buffer, BUFFER_SIZE, &bytesRead);
-	        if (res != FR_OK) {
-	            printf("read data failed! code: %d\r\n", res);
-	            break;
-	        }
-
-	        // 读取到0字节 = 文件结束
-	        if (bytesRead == 0) {
-	            printf("file read complete, total read=%ld bytes\r\n", totalRead);
-	            break;
-	        }
+//	        if (res != FR_OK) {
+//	            printf("read data failed! code: %d\r\n", res);
+//	            break;
+//	        }
+//
+//	        // 读取到0字节 = 文件结束
+//	        if (bytesRead == 0) {
+//	            printf("file read complete, total read=%ld bytes\r\n", totalRead);
+//	            break;
+//	        }
 
 	        // 更新总读取字节数
 	        //totalRead += bytesRead;
