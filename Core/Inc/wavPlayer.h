@@ -18,6 +18,12 @@
 
 #define BUFFER_SIZE 2048
 
+
+
+
+
+
+
 typedef struct {
 	uint8_t riff[4];         // "RIFF"
 	uint32_t file_size;       // 文件大小 - 8
@@ -46,6 +52,18 @@ typedef struct {
 
 void testRead();
 
+
+
+ FRESULT res;
+ FIL file;
+ UINT bytesRead;
+ uint8_t buffer[BUFFER_SIZE];  // 读取缓冲区
+ uint32_t totalRead = 0;
+ const char *filename = "1.wav";
+ WavHeader wavHeader;          // 新增：用于解析WAV头部
+ uint8_t sample_bytes = 2;     // 默认16位采样（2字节），后续会更新
+
+ int playFlag=0;
 
 
 

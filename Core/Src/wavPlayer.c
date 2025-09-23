@@ -14,19 +14,15 @@
 void HAL_I2S_TxCpltCallback(I2S_HandleTypeDef *hi2s) {
 
 	//printf("HAL_I2S_TxCpltCallback\r\n");
+
+	// res = f_read(&file, buffer, BUFFER_SIZE, &bytesRead);
+
+	 //HAL_I2S_Transmit_DMA(&hi2s2, (uint16_t*)buffer, bytesRead / sample_bytes);
 }
 
 
 void testRead() {
 
-	   FRESULT res;
-	    FIL file;
-	    UINT bytesRead;
-	    uint8_t buffer[BUFFER_SIZE];  // 读取缓冲区
-	    uint32_t totalRead = 0;
-	    const char *filename = "1.wav";
-	    WavHeader wavHeader;          // 新增：用于解析WAV头部
-	    uint8_t sample_bytes = 2;     // 默认16位采样（2字节），后续会更新
 
 	    // 1. 打开文件
 	    res = f_open(&file, filename, FA_READ);
@@ -71,12 +67,16 @@ void testRead() {
 	        f_lseek(&file, f_tell(&file) + chunk_size);
 	    }
 
+
 	    // 4. 循环读取并播放音频数据
 	    while (1) {
 	        // 等待I2S空闲（避免DMA冲突）
-	        while (HAL_I2S_GetState(&hi2s2) == HAL_I2S_STATE_BUSY_TX) {
-	            continue;
-	        }
+//	        while (HAL_I2S_GetState(&hi2s2) == HAL_I2S_STATE_BUSY_TX) {
+//	            continue;
+//	        }
+	    	  while (HAL_I2S_GetState(&hi2s2) == HAL_I2S_STATE_BUSY_TX) {
+	    		            continue;
+	    		        }
 
 	        // 读取数据（用实际需要的字节数，而非固定BUFFER_SIZE）
 	        res = f_read(&file, buffer, BUFFER_SIZE, &bytesRead);

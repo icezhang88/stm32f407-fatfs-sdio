@@ -1,2 +1,2 @@
 ../Core/Src/wavPlayer.c:14:6:HAL_I2S_TxCpltCallback	1
-../Core/Src/wavPlayer.c:20:6:testRead	13
+../Core/Src/wavPlayer.c:24:6:testRead	13
