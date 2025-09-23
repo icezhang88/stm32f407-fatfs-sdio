@@ -9,11 +9,6 @@
 
 #define BUFFER_SIZE 2048
 
-void HAL_I2S_TxCpltCallback(I2S_HandleTypeDef *hi2s) {
-
-	//printf("HAL_I2S_TxCpltCallback\r\n");
-}
-
 
 
 uint8_t initFileManager() {

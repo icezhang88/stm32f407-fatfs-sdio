@@ -1,9 +1,5 @@
-../Core/Src/main.c:64:5:__io_putchar	16	static
-../Core/Src/main.c:69:5:__io_getchar	16	static
-../Core/Src/main.c:105:6:testRead	2680	static
-../Core/Src/main.c:192:9:WavOpen	40	static
-../Core/Src/main.c:259:9:FillBuffer	40	static
-../Core/Src/main.c:293:6:WavPlay	16	static
-../Core/Src/main.c:359:5:main	48	static
-../Core/Src/main.c:418:6:SystemClock_Config	88	static
-../Core/Src/main.c:468:6:Error_Handler	4	static,ignoring_inline_asm
+../Core/Src/main.c:40:5:__io_putchar	16	static
+../Core/Src/main.c:45:5:__io_getchar	16	static
+../Core/Src/main.c:250:5:main	8	static
+../Core/Src/main.c:309:6:SystemClock_Config	88	static
+../Core/Src/main.c:359:6:Error_Handler	4	static,ignoring_inline_asm
