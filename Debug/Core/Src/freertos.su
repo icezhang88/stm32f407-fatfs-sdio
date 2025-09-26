@@ -1,2 +1,4 @@
-../Core/Src/freertos.c:72:6:MX_FREERTOS_Init	8	static
-../Core/Src/freertos.c:114:6:StartDefaultTask	16	static
+../Core/Src/freertos.c:81:6:MX_FREERTOS_Init	8	static
+../Core/Src/freertos.c:125:6:StartDefaultTask	24	static
+../Core/Src/freertos.c:166:6:HAL_I2S_TxCpltCallback	16	static
+../Core/Src/freertos.c:172:5:readAndPlayNextBuffer	16	static
